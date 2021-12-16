@@ -44,9 +44,9 @@ static struct sio_ctx*
 get_sio_ctx(struct voss_backend *pbe)
 {
 	if (pbe)
-		return pbe->arg;
+		return (pbe->arg);
 
-	return NULL;
+	return (NULL);
 }
 
 static struct sio_hdl*
@@ -55,9 +55,9 @@ get_sio_hdl(struct voss_backend *pbe)
 	struct sio_ctx* ctx = get_sio_ctx(pbe);
 
 	if (ctx)
-		return ctx->hdl;
+		return (ctx->hdl);
 
-	return NULL;
+	return (NULL);
 }
 
 
@@ -82,47 +82,50 @@ sndio_onmove_cb(void* addr, int delta)
 	get_sio_ctx(pbe)->realpos += (delta * /*bps=*/2 * /*pchan=*/2);
 }
 
-static int sndio_get_signedness(int *fmt) {
+static int sndio_get_signedness(int *fmt)
+{
 	int s_fmt = *fmt & (VPREFERRED_SLE_AFMT | VPREFERRED_SBE_AFMT);
 	if (s_fmt) {
 		*fmt = s_fmt;
-		return 1;
+		return (1);
 	}
 	*fmt = *fmt & (VPREFERRED_ULE_AFMT | VPREFERRED_UBE_AFMT);
-	return 0;
+	return (0);
 }
 
-static int sndio_get_endianness_is_le(int *fmt) {
+static int sndio_get_endianness_is_le(int *fmt)
+{
 	int le_fmt = *fmt & (VPREFERRED_SLE_AFMT | VPREFERRED_ULE_AFMT);
 	if (le_fmt) {
 		*fmt = le_fmt;
-		return 1;
+		return (1);
 	}
 	*fmt = *fmt & (VPREFERRED_SBE_AFMT | VPREFERRED_UBE_AFMT);
-	return 0;
+	return (0);
 }
 
-static int sndio_get_bits(int *fmt) {
+static int sndio_get_bits(int *fmt)
+{
 	if (*fmt & (AFMT_S16_LE | AFMT_U16_LE | AFMT_S16_BE | AFMT_U16_BE)) {
-		return 16;
+		return (16);
 	}
 	if (*fmt & (AFMT_S24_LE | AFMT_U24_LE | AFMT_S24_BE | AFMT_U24_BE)) {
-		return 24;
+		return (24);
 	}
 	if (*fmt & (AFMT_S32_LE | AFMT_U32_LE | AFMT_S32_BE | AFMT_U32_BE)) {
-		return 32;
+		return (32);
 	}
 	if (*fmt & (AFMT_S8 | AFMT_U8)) {
-		return 8;
+		return (8);
 	}
-	return -1;
+	return (-1);
 }
 
 static int
 sndio_open(struct voss_backend *pbe, const char *devname,
     int samplerate, int bufsize, int *pchannels, int *pformat)
 {
-    const char *sndio_name = devname + 6;
+    const char *sndio_name = devname + strlen("/dev/sndio/");
 
 	int sig = sndio_get_signedness(pformat);
 	int le  = sndio_get_endianness_is_le(pformat);
@@ -191,10 +194,8 @@ sndio_play_transfer(struct voss_backend *pbe, void *ptr, int len)
 		get_sio_ctx(pbe)->writepos += r;
 	}
 
-    return r;
+    return (r);
 }
-
-
 
 static void
 sndio_delay(struct voss_backend *pbe, int *pdelay)
@@ -207,8 +208,9 @@ sndio_delay(struct voss_backend *pbe, int *pdelay)
 	int delay = get_sio_ctx(pbe)->writepos - get_sio_ctx(pbe)->realpos;
 	*pdelay = delay;
 
-	// double delay_sec = ((double)delay) / (bits/8 * pchannels * samplerate);
-
+    /* We've computed a delay in bytes, but it may be too large to be handled
+     * correctly by the main loop in virtual_oss_process. As a result, we don't
+     * use it for now. */
 	*pdelay = -1;
 }
 

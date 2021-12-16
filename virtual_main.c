@@ -1645,7 +1645,7 @@ voss_rx_backend_refresh(void)
 		voss_rx_backend = &voss_backend_bt_rec;
 #endif
 #ifdef HAVE_SNDIO
-	} else if (strstr(voss_dsp_tx_device, "sndio:") == voss_dsp_tx_device) {
+	} else if (strstr(voss_dsp_tx_device, "/dev/sndio/") == voss_dsp_tx_device) {
 		warn("sndio recording not implemented");
 #endif
 	} else {
@@ -1664,7 +1664,7 @@ voss_tx_backend_refresh(void)
 		voss_tx_backend = &voss_backend_bt_play;
 #endif
 #ifdef HAVE_SNDIO
-	} else if (strstr(voss_dsp_tx_device, "sndio:") == voss_dsp_tx_device) {
+	} else if (strstr(voss_dsp_tx_device, "/dev/sndio/") == voss_dsp_tx_device) {
 		voss_tx_backend = &voss_backend_sndio_play;
 #endif
 	} else {
